@@ -10,7 +10,7 @@ import pickle
 # Create Flask app
 app = Flask(__name__)
 
-model = pickle.load(open('model.pkl', 'rb'))
+model = pickle.load(open('models/model.pkl', 'rb'))
 
 # Load the trained pipeline
 #with open('C:/Users/moudg/Desktop/great_lakes_docs/TERM 5/Predictive analytics lab/INCLASS ASSIGNMENT 1/model.pkl', 'rb') as f:

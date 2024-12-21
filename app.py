@@ -1,26 +1,18 @@
-"""
-Application that predicts laptop prices based on user input fields.
-"""
 
-import numpy as np
-import pandas as pd
-from flask import Flask, request, render_template
+from flask import Flask, render_template, request
 import pickle
+import pandas as pd
+import numpy as np
 
-# Create Flask app
-app = Flask(__name__)
-
+# Load the trained model
 model = pickle.load(open('models/model.pkl', 'rb'))
 
-# Load the trained pipeline
-#with open('C:/Users/moudg/Desktop/great_lakes_docs/TERM 5/Predictive analytics lab/INCLASS ASSIGNMENT 1/model.pkl', 'rb') as f:
-#    pipeline = pickle.load(f)
-    
-# Define the categorical features and their possible values
-categorical_columns = ['Company', 'TypeName', 'Cpu Name', 'OpSys', 'Gpu']
-feature_order = ['Company', 'TypeName', 'Inches', 'Ram', 'Gpu', 'OpSys', 'Touchscreen', 'Cpu Name']
+app = Flask(__name__)
 
-    
+# Define the categorical features and their possible values
+categorical_columns = ['Company', 'TypeName', 'Weight_Category', 'Cpu_brand', 'Gpu_brand', 'Os']
+feature_order = ['Company', 'TypeName', 'Ram', 'Weight_Category', 'Cpu_brand', 'HDD', 'SSD', 'Gpu_brand', 'Os']
+
 def preprocess_input(user_input):
     """
     Preprocess form data to match the model's expected input.
@@ -43,7 +35,7 @@ def preprocess_input(user_input):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index_1.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -52,12 +44,13 @@ def predict():
         user_input = {
             "Company": request.form.get("Company"),
             "TypeName": request.form.get("TypeName"),
-            "Inches": request.form.get("Inches"),
             "Ram": int(request.form.get("Ram")),
-            "gpu": request.form.get("gpu"),
-            "os": request.form.get("os"),
-            "touchscreen": int(request.form.get("touchscreen")),
-            "cpu": int(request.form.get("cpu")),
+            "Weight_Category": request.form.get("Weight_Category"),
+            "Cpu_brand": request.form.get("Cpu_brand"),
+            "HDD": int(request.form.get("HDD")),
+            "SSD": int(request.form.get("SSD")),
+            "Gpu_brand": request.form.get("Gpu_brand"),
+            "Os": request.form.get("Os"),
         }
 
         # Preprocess the input
@@ -67,46 +60,12 @@ def predict():
         prediction = model.predict(processed_data)[0]
 
         # Return prediction to the template
-        return render_template('index.html', prediction_text=f'Predicted Price: {round(prediction, 2)}')
+        return render_template('index_1.html', prediction_text=f'Predicted Price: {round(prediction, 2)}')
     
     except Exception as e:
         # Log and handle the error
-        print(e)
-        return render_template('index.html', prediction_text="An error occurred during prediction. Please try again.")
+        print(f"Error: {e}")
+        return render_template('index_1.html', prediction_text="An error occurred during prediction. Please try again.")
 
-'''
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        # Get form data
-        company = request.form['company']
-        typename = request.form['type']
-        inches = float(request.form['inches'])
-        ram = int(request.form['ram'])
-        gpu = request.form['gpu']
-        os = request.form['os']
-        touchscreen = int(request.form['touchscreen'])
-        cpu_name = request.form['cpu']
-
-        # Create input DataFrame
-        input_data = pd.DataFrame({
-            'Company': [company],
-            'TypeName': [typename],
-            'Inches': [inches],
-            'Ram': [ram],
-            'Gpu': [gpu],
-            'OpSys': [os],
-            'Touchscreen': [touchscreen],
-            'Cpu Name': [cpu_name]
-        })
-
-        # Make prediction
-        predicted_price_log = pipeline.predict(input_data)
-        predicted_price = np.exp(predicted_price_log)  # Convert log-price back to original scale
-
-        return render_template('index.html', prediction_text=f'Predicted Laptop Price: ${predicted_price[0]:.2f}')
-    except Exception as e:
-        return f"Error occurred: {str(e)}"
-'''
 if __name__ == "__main__":
     app.run(debug=True)
